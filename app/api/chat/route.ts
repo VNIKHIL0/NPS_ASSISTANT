@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         const coreMessages = convertToCoreMessages(messages);
 
         const result = await streamText({
-            model: google('gemini-1.5-flash-latest'),
+            model: google('gemini-flash-latest'),
             system: `NPS Expert. Respond in ${targetLanguage}. Be concise & accurate.`,
             messages: coreMessages,
         });

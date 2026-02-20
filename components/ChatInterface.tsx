@@ -29,7 +29,7 @@ export function ChatInterface() {
     const { t, language } = useLanguage();
 
     // Pass onError in options
-    const { messages, status, append } = useChat({
+    const { messages, status, sendMessage } = useChat({
         onError: (e: any) => console.error("Chat Error:", e),
     });
 
@@ -56,8 +56,11 @@ export function ChatInterface() {
 
     const handleSend = async (text: string) => {
         if (!text.trim()) return;
-        append({ role: 'user', content: text.trim() }, { body: { language } });
-        setInputValue("");
+        if (sendMessage) {
+            // Pass language in body here
+            sendMessage({ text: text.trim() }, { body: { language } });
+            setInputValue("");
+        }
     };
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -395,7 +398,7 @@ export function ChatInterface() {
             <LiveAssistant
                 isOpen={isAssistantOpen}
                 onClose={() => setIsAssistantOpen(false)}
-                sendMessage={(options: any) => append({ role: 'user', content: options.text }, { body: { language } })}
+                sendMessage={sendMessage}
                 messages={messages}
                 isLoading={isLoading}
             />
