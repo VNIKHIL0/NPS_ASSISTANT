@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     try {
         const result = await streamText({
-            model: google("gemini-1.5-flash-latest"),
+            model: google("gemini-flash-latest"),
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: `Generate NPS roadmap in ${fullLanguage}.` }
