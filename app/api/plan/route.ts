@@ -32,7 +32,6 @@ export async function POST(req: Request) {
     try {
         const result = await streamText({
             model: openrouter("google/gemini-2.5-flash"),
-            maxTokens: 1000,
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: `Generate NPS roadmap in ${fullLanguage}.` }

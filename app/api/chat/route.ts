@@ -57,7 +57,6 @@ export async function POST(req: Request) {
             model: openrouter('google/gemini-2.5-flash'),
             system: `NPS Expert. Respond in ${targetLanguage}. Be concise & accurate.`,
             messages: coreMessages,
-            maxTokens: 1000,
         });
 
         return result.toUIMessageStreamResponse();
