@@ -1,9 +1,22 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { streamText, UIMessage } from 'ai';
 import { languageFullNames, Language } from '@/constants/translations';
 
-const google = createGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+const openrouter = createOpenRouter({
+    apiKey: process.env.OPENROUTER_API_KEY,
+    fetch: async (url, options) => {
+        if (options && options.body) {
+            try {
+                const body = JSON.parse(options.body as string);
+                // Force max_tokens to 1000 to avoid OpenRouter requesting 65535 tokens
+                body.max_tokens = 1000;
+                options.body = JSON.stringify(body);
+            } catch (e) {
+                // Ignore parse errors
+            }
+        }
+        return fetch(url, options);
+    }
 });
 
 export const maxDuration = 30;
@@ -31,19 +44,20 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { messages, language } = body;
         console.log("Chat Route Hit. Language:", language);
-        if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+        if (!process.env.OPENROUTER_API_KEY) {
             console.error("API Key MISSING in route.ts");
         } else {
-            console.log("API Key Present (Length: " + process.env.GOOGLE_GENERATIVE_AI_API_KEY.length + ")");
+            console.log("API Key Present (Length: " + process.env.OPENROUTER_API_KEY.length + ")");
         }
 
         const targetLanguage = languageFullNames[language as Language] || "English";
         const coreMessages = convertToCoreMessages(messages);
 
         const result = await streamText({
-            model: google('gemini-flash-latest'),
+            model: openrouter('google/gemini-2.5-flash'),
             system: `NPS Expert. Respond in ${targetLanguage}. Be concise & accurate.`,
             messages: coreMessages,
+            maxTokens: 1000,
         });
 
         return result.toUIMessageStreamResponse();

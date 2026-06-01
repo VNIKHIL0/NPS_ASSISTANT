@@ -1,6 +1,22 @@
-import { google } from "@ai-sdk/google";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { streamText } from "ai";
 import { languageFullNames } from "@/constants/translations";
+
+const openrouter = createOpenRouter({
+    apiKey: process.env.OPENROUTER_API_KEY,
+    fetch: async (url, options) => {
+        if (options && options.body) {
+            try {
+                const body = JSON.parse(options.body as string);
+                body.max_tokens = 1000;
+                options.body = JSON.stringify(body);
+            } catch (e) {
+                // Ignore parse errors
+            }
+        }
+        return fetch(url, options);
+    }
+});
 
 export const maxDuration = 30;
 
@@ -15,7 +31,8 @@ export async function POST(req: Request) {
 
     try {
         const result = await streamText({
-            model: google("gemini-flash-latest"),
+            model: openrouter("google/gemini-2.5-flash"),
+            maxTokens: 1000,
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: `Generate NPS roadmap in ${fullLanguage}.` }
